@@ -2,69 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #030303;
-  --foreground: #f4f4f5;
-  --card: #09090b;
-  --card-border: rgba(255, 255, 255, 0.08);
-  --primary: #c084fc; /* soft purple */
-  --primary-glow: rgba(192, 132, 252, 0.15);
-  --secondary: #60a5fa; /* soft blue */
-  --accent: #f472b6; /* soft pink */
-  
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-}
-
-html {
-  scroll-behavior: initial; /* Essential for Lenis smooth scrolling */
-}
-
-body {
-  color: var(--foreground);
-  background-color: var(--background);
-  font-family: var(--font-sans);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #08080a;
-}
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
-
-/* Lenis Custom Smooth Scroll Styles */
-html.lenis {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
-}
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overflow: clip;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
-
-/* CSS Utilities for Animations */
-.reveal-text {
-  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-  transform: translateY(30px);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body { background: #0A0F1E; color: #FFFFFF; overflow-x: hidden; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
 
 /* Custom Gradients & Glassmorphism */
 .glass-panel {
@@ -88,37 +30,4 @@ html.lenis {
 
 .radial-glow {
   background: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 70%);
-}
-
-/* Splide Custom Pagination and Arrows */
-.splide__pagination__page {
-  background: rgba(255, 255, 255, 0.2) !important;
-  width: 8px !important;
-  height: 8px !important;
-  transition: all 0.3s ease !important;
-}
-
-.splide__pagination__page.is-active {
-  background: var(--primary) !important;
-  transform: scale(1.4) !important;
-  width: 20px !important;
-  border-radius: 4px !important;
-}
-
-.splide__arrow {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  width: 48px !important;
-  height: 48px !important;
-  transition: all 0.3s ease !important;
-}
-
-.splide__arrow:hover {
-  background: var(--primary) !important;
-  color: #000 !important;
-  border-color: var(--primary) !important;
-}
-
-.splide__arrow svg {
-  fill: currentColor !important;
 }

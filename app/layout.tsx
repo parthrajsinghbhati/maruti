@@ -10,7 +10,7 @@ const jakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Maruti | Premium Digital Experiences",
-  description: "A state-of-the-art interactive web application built with Next.js 14, Tailwind CSS, GSAP, and Lenis.",
+  description: "A state-of-the-art interactive web experience built with Next.js 14, Tailwind CSS, and GSAP.",
   openGraph: {
     title: "Maruti | Premium Digital Experiences",
     description: "Interactive brand storytelling and digital engineering.",
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${jakartaSans.variable} font-sans antialiased bg-[#030303] text-[#f4f4f5]`}>
+      <body className={`${jakartaSans.variable} font-sans antialiased bg-[#0A0F1E] text-white`}>
         {children}
       </body>
     </html>
