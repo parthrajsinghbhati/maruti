@@ -56,9 +56,6 @@ export default function HeroScroll() {
   // Refs for equality checks — avoid re-rendering when computed value hasn't changed
   const activeSectionRef = useRef("design");
   const activeIdRef = useRef("design");
-  // Tracks which destination scene is being pre-warmed during a scroll transition.
-  // The scene play/pause effect must NOT pause this video.
-  const preStartingSceneRef = useRef<string | null>(null);
 
   // Loading tracking via ref (no re-render cost per video)
   const videosLoadedRef = useRef<Record<string, boolean>>({
@@ -171,26 +168,21 @@ export default function HeroScroll() {
       const video = ref.current;
       if (!video) return;
       if (id === activeSection) {
-        // If the video was pre-started during transition it is already playing —
-        // skip the reset to avoid the flash of opacity-0 before onPlaying fires.
         if (video.paused) {
           setVideoReady((prev) => ({ ...prev, [id]: false }));
           video.currentTime = 0;
-          video.play().catch((err) => console.error(`Play error for ${id}:`, err));
+          video.play().catch((err) => console.error(`Replay error for ${id}:`, err));
         }
       } else {
-        // Never pause the scene we intentionally pre-started behind the scroll layer.
-        if (id !== preStartingSceneRef.current && !video.paused) video.pause();
-        if (id !== preStartingSceneRef.current) {
-          setVideoReady((prev) => ({ ...prev, [id]: false }));
-        }
+        if (!video.paused) video.pause();
+        setVideoReady((prev) => ({ ...prev, [id]: false }));
       }
     });
   }, [activeSection, isVideoLoaded]);
 
   const animationRef = useRef<gsap.core.Tween | null>(null);
 
-  // Play scroll transition video + pre-start destination scene in background
+  // Play scroll transition video
   const playScrollVideo = useCallback((fromIndex: number, targetIndex: number) => {
     const scrollRefs = [scroll1Ref, scroll2Ref, scroll3Ref, scroll4Ref];
     const vid = scrollRefs[Math.min(fromIndex, targetIndex)]?.current;
@@ -198,21 +190,6 @@ export default function HeroScroll() {
     vid.currentTime = 0;
     vid.playbackRate = 1;
     vid.play().catch(() => {});
-
-    // Pre-start destination scene video behind the scroll layer.
-    // We mark it in preStartingSceneRef FIRST so the play/pause effect
-    // (which will fire when activeSection flips to the scroll section)
-    // does NOT immediately pause the video we're about to play.
-    const sceneRefs = [scene1Ref, scene2Ref, scene3Ref, scene4Ref, scene5Ref];
-    const destIds   = ["design", "robot", "box", "workshop", "outro"];
-    const destId    = destIds[targetIndex];
-    const destVid   = sceneRefs[targetIndex]?.current;
-    if (destVid) {
-      preStartingSceneRef.current = destId;
-      setVideoReady((prev) => ({ ...prev, [destId]: false }));
-      destVid.currentTime = 0;
-      destVid.play().catch(() => {});
-    }
 
     return vid;
   }, []);
@@ -235,7 +212,6 @@ export default function HeroScroll() {
     if (direction === 'back') {
       // Instant jump backwards — no scroll video, no tween through a scroll section.
       // Directly land on the previous scene.
-      preStartingSceneRef.current = null;
       virtualProgressRef.current = targetProgress;
       setVirtualProgress(targetProgress);
       isTransitioningRef.current = false;
@@ -268,7 +244,6 @@ export default function HeroScroll() {
           destVid.currentTime = 0;
           destVid.play().catch(() => {});
         }
-        preStartingSceneRef.current = null;
         isTransitioningRef.current = false;
         setIsTransitioning(false);
       },
