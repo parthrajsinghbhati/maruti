@@ -335,49 +335,7 @@ export default function HeroScroll() {
     };
   }, [isVideoLoaded]);
 
-  const handleTabClick = (id: string) => {
-    // Clear any pending loops
-    Object.values(loopTimeoutsRef.current).forEach(clearTimeout);
 
-    const targetMap: Record<string, number> = {
-      design: 0, robot: 1, box: 2, workshop: 3, outro: 4,
-    };
-    const targetSceneIndex = targetMap[id] ?? 0;
-    const targetProgress = targetSceneIndex * 0.25;
-
-    if (Math.abs(virtualProgress - targetProgress) < 0.01) return;
-
-    const direction = targetSceneIndex > currentSceneIndex ? 'forward' : 'back';
-
-    if (Math.abs(targetSceneIndex - currentSceneIndex) === 1) {
-      // Adjacent scene: use transitionTo (handles both directions)
-      transitionTo(targetSceneIndex, direction);
-    } else {
-      // Multi-step jump: fade out, snap, fade in
-      const container = containerRef.current;
-      if (!container) return;
-      setIsTransitioning(true);
-      setCurrentSceneIndex(targetSceneIndex);
-      preStartingSceneRef.current = null;
-      gsap.to(container, {
-        opacity: 0,
-        duration: 0.4,
-        onComplete: () => {
-          setVirtualProgress(targetProgress);
-          virtualProgressRef.current = targetProgress;
-          gsap.to(container, {
-            opacity: 1,
-            duration: 0.4,
-            delay: 0.1,
-            onComplete: () => {
-              isTransitioningRef.current = false;
-              setIsTransitioning(false);
-            },
-          });
-        },
-      });
-    }
-  };
 
   const loadingPercentage = Math.min(100, Math.floor((loadedCount / 9) * 100));
 
