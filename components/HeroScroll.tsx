@@ -6,7 +6,7 @@ import { videoSections } from "../lib/sections";
 
 // Durations must match the actual scroll video file lengths exactly.
 // scroll1=2.0s, scroll2=2.333s, scroll3=4.0s, scroll4=6.5s
-const TRANSITION_DURATION = [2.0, 2.333, 4.0, 6.5];
+const TRANSITION_DURATION = [2.285, 1.5, 3.5, 6.1];
 const TRANSITION_EASE = "sine.out";
 
 const getTransitionDuration = (fromIndex: number, toIndex: number) => {
@@ -65,6 +65,35 @@ export default function HeroScroll() {
     design: false, scroll1: false, robot: false, scroll2: false,
     box: false, scroll3: false, workshop: false, scroll4: false, outro: false,
   });
+
+
+
+  // Keep track of loop timeouts so we can clear them on unmount or transition
+  const loopTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  const handleVideoEnded = useCallback((id: string, videoRef: React.RefObject<HTMLVideoElement | null>) => {
+    if (loopTimeoutsRef.current[id]) {
+      clearTimeout(loopTimeoutsRef.current[id]);
+    }
+
+    loopTimeoutsRef.current[id] = setTimeout(() => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      if (activeSectionRef.current === id && !isTransitioningRef.current) {
+        video.currentTime = 0;
+        video.play().catch((err) => console.error(`Replay error for ${id}:`, err));
+      }
+    }, 300); // 0.3s pause
+  }, []);
+
+  // Cleanup loop timeouts on unmount
+  useEffect(() => {
+    const timeouts = loopTimeoutsRef.current;
+    return () => {
+      Object.values(timeouts).forEach(clearTimeout);
+    };
+  }, []);
 
   // Sync refs to state
   useEffect(() => { isTransitioningRef.current = isTransitioning; }, [isTransitioning]);
@@ -190,6 +219,10 @@ export default function HeroScroll() {
 
   const transitionTo = useCallback((targetIndex: number, direction: 'forward' | 'back' = 'forward') => {
     if (isTransitioningRef.current) return;
+
+    // Clear any pending loops
+    Object.values(loopTimeoutsRef.current).forEach(clearTimeout);
+
     isTransitioningRef.current = true;
     setIsTransitioning(true);
 
@@ -303,6 +336,9 @@ export default function HeroScroll() {
   }, [isVideoLoaded]);
 
   const handleTabClick = (id: string) => {
+    // Clear any pending loops
+    Object.values(loopTimeoutsRef.current).forEach(clearTimeout);
+
     const targetMap: Record<string, number> = {
       design: 0, robot: 1, box: 2, workshop: 3, outro: 4,
     };
@@ -345,6 +381,9 @@ export default function HeroScroll() {
 
   const loadingPercentage = Math.min(100, Math.floor((loadedCount / 9) * 100));
 
+  const activeSceneData = videoSections.find((s) => s.id === activeId);
+  const showTextCard = isVideoLoaded && activeSection === activeId;
+
   // Helper: is a given section active (visible on screen)?
   const sectionActive = (id: string) => isVideoLoaded && activeSection === id;
 
@@ -366,7 +405,8 @@ export default function HeroScroll() {
           onPlaying={() => handleVideoPlaying("design")}
           onTimeUpdate={() => handleVideoPlaying("design")}
           onLoadedMetadata={() => handleVideoLoaded("design")}
-          playsInline muted loop autoPlay preload="auto"
+          onEnded={() => handleVideoEnded("design", scene1Ref)}
+          playsInline muted autoPlay preload="auto"
           className={`absolute inset-0 w-full h-full object-cover ${videoReady["design"] ? "opacity-100" : "opacity-0"}`}
         >
           <source src="/videos/scene1.mp4" type="video/mp4" />
@@ -394,7 +434,8 @@ export default function HeroScroll() {
           onPlaying={() => handleVideoPlaying("robot")}
           onTimeUpdate={() => handleVideoPlaying("robot")}
           onLoadedMetadata={() => handleVideoLoaded("robot")}
-          playsInline muted loop preload="auto"
+          onEnded={() => handleVideoEnded("robot", scene2Ref)}
+          playsInline muted preload="auto"
           className={`absolute inset-0 w-full h-full object-cover ${videoReady["robot"] ? "opacity-100" : "opacity-0"}`}
         >
           <source src="/videos/scene2.mp4" type="video/mp4" />
@@ -422,7 +463,8 @@ export default function HeroScroll() {
           onPlaying={() => handleVideoPlaying("box")}
           onTimeUpdate={() => handleVideoPlaying("box")}
           onLoadedMetadata={() => handleVideoLoaded("box")}
-          playsInline muted loop preload="auto"
+          onEnded={() => handleVideoEnded("box", scene3Ref)}
+          playsInline muted preload="auto"
           className={`absolute inset-0 w-full h-full object-cover ${videoReady["box"] ? "opacity-100" : "opacity-0"}`}
         >
           <source src="/videos/scene3.mp4" type="video/mp4" />
@@ -450,7 +492,8 @@ export default function HeroScroll() {
           onPlaying={() => handleVideoPlaying("workshop")}
           onTimeUpdate={() => handleVideoPlaying("workshop")}
           onLoadedMetadata={() => handleVideoLoaded("workshop")}
-          playsInline muted loop preload="auto"
+          onEnded={() => handleVideoEnded("workshop", scene4Ref)}
+          playsInline muted preload="auto"
           className={`absolute inset-0 w-full h-full object-cover ${videoReady["workshop"] ? "opacity-100" : "opacity-0"}`}
         >
           <source src="/videos/scene4.mp4" type="video/mp4" />
@@ -478,7 +521,8 @@ export default function HeroScroll() {
           onPlaying={() => handleVideoPlaying("outro")}
           onTimeUpdate={() => handleVideoPlaying("outro")}
           onLoadedMetadata={() => handleVideoLoaded("outro")}
-          playsInline muted loop preload="auto"
+          onEnded={() => handleVideoEnded("outro", scene5Ref)}
+          playsInline muted preload="auto"
           className={`absolute inset-0 w-full h-full object-cover ${videoReady["outro"] ? "opacity-100" : "opacity-0"}`}
         >
           <source src="/videos/scene5.mp4" type="video/mp4" />
@@ -495,41 +539,18 @@ export default function HeroScroll() {
         </div>
       )}
 
-      {/* Floating bottom nav */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-4xl rounded-full bg-[#0A0F1E]/85 backdrop-blur-md border border-white/10 shadow-2xl p-4 flex items-center justify-center select-none">
-        {/* Progress bar */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-white/10 rounded-t-full overflow-hidden">
-          <div
-            className="h-full bg-[#2563EB] transition-all duration-100 ease-out"
-            style={{ width: `${virtualProgress * 100}%` }}
-          />
-        </div>
-
-        {/* Scene tabs */}
-        <div className="flex items-center justify-center gap-1.5 md:gap-4 w-full">
-          {videoSections
-            .filter((s) => !s.id.startsWith("scroll"))
-            .map((section) => {
-              const isActive = activeId === section.id;
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => handleTabClick(section.id)}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all duration-300 group"
-                >
-                  <span className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    isActive ? "bg-[#2563EB] scale-125" : "bg-white/40 group-hover:bg-white/70"
-                  }`} />
-                  <span className={`text-[10px] md:text-xs font-bold tracking-wider uppercase transition-colors duration-300 ${
-                    isActive ? "text-white" : "text-white/40 group-hover:text-white/70"
-                  }`}>
-                    {section.id}
-                  </span>
-                </button>
-              );
-            })}
-        </div>
+      {/* Floating Scene Information Card */}
+      <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-2xl rounded-2xl bg-blue-600/90 backdrop-blur-md border border-blue-400/40 shadow-[0_0_50px_rgba(37,99,235,0.4)] p-6 text-white text-center transition-all duration-500 transform ${
+        showTextCard ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
+      }`}>
+        <h2 className="text-xl md:text-2xl font-extrabold tracking-wider mb-2 uppercase drop-shadow">
+          {activeSceneData?.title}
+        </h2>
+        <p className="text-xs md:text-sm text-blue-100 font-medium tracking-wide">
+          {activeSceneData?.sub}
+        </p>
       </div>
+
     </section>
   );
 }
