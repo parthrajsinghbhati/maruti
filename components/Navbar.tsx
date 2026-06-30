@@ -4,8 +4,8 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 w-full h-[72px] z-50 bg-transparent flex items-center justify-between px-6 md:px-12 text-white border-b border-white/5">
       {/* Left: Logo */}
-      <div className="font-extrabold text-xl tracking-wider text-[#2563EB]">
-        MARUTI
+      <div className="bg-[#2563EB] text-white px-5 py-2 font-extrabold text-base md:text-lg tracking-widest rounded-md shadow-sm">
+        MARUTI SUZUKI
       </div>
 
       {/* Right: Nav Links Placeholder */}

@@ -473,15 +473,23 @@ export default function HeroScroll() {
       )}
 
       {/* Floating Scene Information Card */}
-      <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-2xl rounded-2xl bg-blue-600/90 backdrop-blur-md border border-blue-400/40 shadow-[0_0_50px_rgba(37,99,235,0.4)] p-6 text-white text-center transition-all duration-500 transform ${
+      <div className={`absolute bottom-6 left-6 md:bottom-8 md:left-12 z-30 w-[calc(100%-3rem)] sm:max-w-md md:max-w-lg lg:max-w-[520px] rounded-[24px] bg-white/50 backdrop-blur-lg border border-white/30 shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-8 md:p-10 text-[#1C1C1E] text-left transition-all duration-500 transform ${
         showTextCard ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
       }`}>
-        <h2 className="text-xl md:text-2xl font-extrabold tracking-wider mb-2 uppercase drop-shadow">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-normal tracking-tight text-[#1A1A1A] leading-tight mb-4 font-inter">
           {activeSceneData?.title}
         </h2>
-        <p className="text-xs md:text-sm text-blue-100 font-medium tracking-wide">
+        <p className="text-sm md:text-base text-neutral-600 leading-relaxed font-normal mb-8 font-inter">
           {activeSceneData?.sub}
         </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-xs md:text-sm font-semibold px-6 py-3 rounded-full transition-all duration-200 shadow-sm active:scale-95 font-inter">
+            Services overview
+          </button>
+          <button className="bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-xs md:text-sm font-semibold px-6 py-3 rounded-full transition-all duration-200 shadow-sm active:scale-95 font-inter">
+            Know more
+          </button>
+        </div>
       </div>
 
     </section>
